@@ -70,6 +70,7 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
    array_items = [x[:-1] for x in items] 
    print("This is the txt banned IP file from the web", array_items)
 
+   #reads action_file to state if the IP has already been received in the past
    if not os.path.exists(action_file):
        open(action_file, 'w+')
    if os.path.exists(action_file):

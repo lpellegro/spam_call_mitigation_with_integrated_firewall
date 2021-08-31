@@ -4,7 +4,7 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import requests
 from requests.auth import HTTPBasicAuth
-
+#set the firewall rules
 def missing_elements (list):
     if list == []:
        return []
