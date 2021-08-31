@@ -69,7 +69,9 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
    #removes the /n from the list
    array_items = [x[:-1] for x in items] 
    print("This is the txt banned IP file from the web", array_items)
-   
+
+   if not os.path.exists(action_file):
+       open(action_file, 'w+')
    if os.path.exists(action_file):
      with open(action_file, newline='') as a_f: 
       reader = csv.reader(a_f)
