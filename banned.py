@@ -82,7 +82,7 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
    #append new items from JSON response to the list
    storindex=len(storage)
    print("This is a cluster of", storindex, "peers")
-  
+
    old_len=len(array_items)
    print("last line is #", old_len)
    #new_items=[]
@@ -94,7 +94,10 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
        lenght=len(storage[i]['records'])
        print("Parsing peer", i)
        current_peer=storage[i]['peer']
-       
+       if i == 0: #if the peer is inside the same cluster the firewall rule shouldn't be updated. But if it's another cluster the firewall rules should be updated also if the IP is already in the banned list
+          newcluster = True
+       else:
+          newcluster = False
        for j in range(lenght):
            if storage[i]['records'][j]['jail']=='sip-auth':
               ip=storage[i]['records'][j]['banned_address']
@@ -115,6 +118,9 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                   print ('NEW ITEMS LIST IS: ', new_items)
                   newitemflag=1
               else:
+                  if newcluster == True:
+                     firewall(ip, 'ban', host_url, username, secret)
+
                   peer, peer_with_port, parsed_url, expe_ip = local_peer (url, current_peer)
                   card_id = ip + ':' + peer
                   card_identifier_list = column (action_list, 0)
