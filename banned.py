@@ -118,7 +118,7 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                   print ('NEW ITEMS LIST IS: ', new_items)
                   newitemflag=1
               else:
-                  if newcluster == True:
+                  if newcluster == True and ip in new_items:
                      host_url = urlparse(url).netloc
                      firewall(ip, 'ban', host_url, username, secret)
 
