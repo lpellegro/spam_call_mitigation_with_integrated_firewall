@@ -118,7 +118,7 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                   print ('NEW ITEMS LIST IS: ', new_items)
                   newitemflag=1
               else:
-                  if newcluster == True and ip in new_items:
+                  if newcluster == True and ip in new_items: #reason to check is if the ip is in the list, but it has just been added. In this case all clusters after that should include the firewall rule
                      host_url = urlparse(url).netloc
                      firewall(ip, 'ban', host_url, username, secret)
 
