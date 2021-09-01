@@ -60,7 +60,7 @@ def firewall(ip, action, expe, username, secret):
 
     if action == 'ban' and index == '':
        print ('Creating an entry in the firewall')
-       data = {"Priority": priority, "Address": ip, "EndPort": 5061, "Interface": "LAN2", "Action": "Drop", "PrefixLength": 32, "Service": "Custom", "StartPort": 5060, "Transport": "TCP", "Description": "Script generated"}
+       data = {"Priority": priority, "Address": ip, "EndPort": 5061, "Interface": "LAN2", "Action": "Drop", "PrefixLength": 32, "Service": "Custom", "StartPort": 5060, "Transport": "TCP", "Description": "Script generated - spam calls"}
        try:
           response = requests.post(url, json=data, auth=HTTPBasicAuth(username, secret))
           print(response)
