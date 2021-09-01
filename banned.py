@@ -119,6 +119,7 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                   newitemflag=1
               else:
                   if newcluster == True:
+                     host_url = urlparse(url).netloc
                      firewall(ip, 'ban', host_url, username, secret)
 
                   peer, peer_with_port, parsed_url, expe_ip = local_peer (url, current_peer)
