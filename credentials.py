@@ -15,22 +15,22 @@ credentials = {#EXPRESSWAY SECTION
                #Cluster 1
                'expe_cluster1':'expe1a.example.com', #FQDN of cluster1 primary peer
                'url_cluster1':'https://expe1a.example.com', #URL for cluster1 (usually to the primary peer); the URL should include the port if different from 443 
-               'expe1a.example.com':['admin', 'password1a'], #username and password for all peers in all clusters 
-               'expe1b.example.com':['admin', 'password1b'],
+               'expe1a.example.com':['admin', 'password1a', dual_interface], #username and password for all peers in all clusters
+               'expe1b.example.com':['admin', 'password1b', dual_interface], #dual_interface set to True if Expressway has dual NIC, False if single NIC (see below)
                '192.0.2.201':'expe1a.example.com', #IP addresses for all peers in all clusters
                '192.0.2.202':'expe1b.example.com',
-               'dual_interface':True,
+
 
                #Cluster 2 (remove if not present)
                'expe_cluster2':'expe2a.example.com', #FQDN of cluster2 primary peer; add more lines if more clusters are involved 
                'url_cluster2':'https://expe2a.example.com:7443', #URL for cluster2 (includes port 7443 as admin HTTPS traffic uses this port)
-               'expe2a.example.com':['admin', 'password2a'], 
-               'expe2b.example.com':['admin', 'password2b'], 
-               'expe2c.example.com':['admin', 'password2c'],
+               'expe2a.example.com':['admin', 'password2a', dual_interface],
+               'expe2b.example.com':['admin', 'password2b', dual_interface],
+               'expe2c.example.com':['admin', 'password2c', dual_interface],
                '203.0.113.201':'expe2a.example.com',
                '203.0.113.202':'expe2b.example.com',
                '203.0.113.203':'expe2c.example.com',
-               'dual_interface':False,
+
                #Add more clusters if required
                #......
                #CLOUD SECTION
@@ -50,9 +50,8 @@ credentials = {#EXPRESSWAY SECTION
 
 credentials = {'expe_cluster1':'expe.example.com', 
                'url_cluster1':'https://expe.example.com:7443',
-               'expe.example.com':['administrator', 'mysecret'], 
+               'expe.example.com':['administrator', 'mysecret', False], 
                '192.0.2.301':'expe.example.com',
-               'dual_interface': False,
                'roomID':'abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789',
                'bearer':'MNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQ-09876-54321-012345678',
                'apikey':'ab_CDEFGHILMNOPQRST0123',
@@ -65,22 +64,20 @@ Two clusters, 2 and 3 peers with dual NIC, one with standard admin port and anot
 
 credentials = {'expe_cluster1':'expe1a.example.com', 
                'url_cluster1':'https://expe1a.example.com',
-               'expe1a.example.com':['admin', 'password1a'], 
-               'expe1b.example.com':['admin', 'password1b'],  
+               'expe1a.example.com':['admin', 'password1a', True], 
+               'expe1b.example.com':['admin', 'password1b', True],  
                '192.0.2.201':'expe1a.example.com', 
                '192.0.2.202':'expe1b.example.com', 
-               'dual_interface':True,
-
+               
                'expe_cluster2':'expe2a.example.com', 
                'url_cluster2':'https://expe2a.example.com:7443', 
-               'expe2a.example.com':['admin', 'password2a'], 
-               'expe2b.example.com':['admin', 'password2b'], 
-               'expe2c.example.com':['admin', 'password2c'],
+               'expe2a.example.com':['admin', 'password2a', True], 
+               'expe2b.example.com':['admin', 'password2b', True], 
+               'expe2c.example.com':['admin', 'password2c', True],
                '203.0.113.201':'expe2a.example.com',
                '203.0.113.202':'expe2b.example.com',
                '203.0.113.203':'expe2c.example.com',
-               'dual_interface':True,
-
+               
                'roomID':'abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789', 
                'bearer':'MNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQ-09876-54321-012345678', 
                'apikey':'ab_CDEFGHILMNOPQRST0123', 

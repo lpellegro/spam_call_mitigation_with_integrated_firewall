@@ -4,6 +4,22 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import requests
 from requests.auth import HTTPBasicAuth
+from credentials import credentials
+
+def ip_port_info(expe, peer):
+    expe_list = expe.split(':')
+
+    expe_ip = expe_list[0]
+    if peer == '127.0.0.1':
+        peer = expe_ip
+
+    if len(expe_list) == 1:  # use of standard port for https (443)
+        peer_with_port = peer
+
+    if len(expe_list) > 1:
+        peer_with_port = peer + ':' + expe_list[1]
+    return expe_ip, peer, peer_with_port
+
 #set the firewall rules
 def missing_elements (list):
     if list == []:
@@ -60,7 +76,13 @@ def firewall(ip, action, expe, username, secret):
 
     if action == 'ban' and index == '':
        print ('Creating an entry in the firewall')
-       data = {"Priority": priority, "Address": ip, "EndPort": 5061, "Interface": "LAN2", "Action": "Drop", "PrefixLength": 32, "Service": "Custom", "StartPort": 5060, "Transport": "TCP", "Description": "Script generated - spam calls"}
+       expe_fqdn, peer, peer_with_port = ip_port_info (expe, expe)
+       dual_nic_support = credentials[expe_fqdn][2]
+       if dual_nic_support == True:
+          LAN = "LAN2"
+       else:
+          LAN = "LAN1"
+       data = {"Priority": priority, "Address": ip, "EndPort": 5061, "Interface": LAN, "Action": "Deny", "PrefixLength": 32, "Service": "Custom", "StartPort": 5060, "Transport": "TCP", "Description": "Script generated - spam calls"}
        try:
           response = requests.post(url, json=data, auth=HTTPBasicAuth(username, secret))
           print(response)
