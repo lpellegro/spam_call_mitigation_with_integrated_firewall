@@ -18,7 +18,8 @@ credentials = {#EXPRESSWAY SECTION
                'expe1a.example.com':['admin', 'password1a'], #username and password for all peers in all clusters 
                'expe1b.example.com':['admin', 'password1b'],
                '192.0.2.201':'expe1a.example.com', #IP addresses for all peers in all clusters
-               '192.0.2.202':'expe1b.example.com', 
+               '192.0.2.202':'expe1b.example.com',
+               'dual_interface':True,
                #Cluster 2 (remove if not present)
                'expe_cluster2':'expe2a.example.com', #FQDN of cluster2 primary peer; add more lines if more clusters are involved 
                'url_cluster2':'https://expe2a.example.com:7443', #URL for cluster2 (includes port 7443 as admin HTTPS traffic uses this port)
@@ -28,6 +29,7 @@ credentials = {#EXPRESSWAY SECTION
                '203.0.113.201':'expe2a.example.com',
                '203.0.113.202':'expe2b.example.com',
                '203.0.113.203':'expe2c.example.com',
+               'dual_interface':False,
                #Add more clusters if required
                #......
                #CLOUD SECTION
@@ -43,12 +45,13 @@ credentials = {#EXPRESSWAY SECTION
 
 #EXAMPLES
 
-""" Single peer cluster with user 'administrator' and password 'mysecret' that uses port 7443 as admin port
+""" Single peer cluster with single NIC and user 'administrator' and password 'mysecret' that uses port 7443 as admin port
 
 credentials = {'expe_cluster1':'expe.example.com', 
                'url_cluster1':'https://expe.example.com:7443',
                'expe.example.com':['administrator', 'mysecret'], 
                '192.0.2.301':'expe.example.com',
+               'dual_interface': False,
                'roomID':'abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789',
                'bearer':'MNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQ-09876-54321-012345678',
                'apikey':'ab_CDEFGHILMNOPQRST0123',
@@ -57,7 +60,7 @@ credentials = {'expe_cluster1':'expe.example.com',
                'state_machine':'/var/www/html/card_status.csv',
                'activity_list_path':'/var/www/html/'}
 
-Two clusters, 2 and 3 peers, one with standard admin port and another using 7443. Same username and passwords.
+Two clusters, 2 and 3 peers with dual NIC, one with standard admin port and another using 7443. Same username and passwords.
 
 credentials = {'expe_cluster1':'expe1a.example.com', 
                'url_cluster1':'https://expe1a.example.com',
@@ -65,6 +68,7 @@ credentials = {'expe_cluster1':'expe1a.example.com',
                'expe1b.example.com':['admin', 'password1b'],  
                '192.0.2.201':'expe1a.example.com', 
                '192.0.2.202':'expe1b.example.com', 
+               'dual_interface':True,
 
                'expe_cluster2':'expe2a.example.com', 
                'url_cluster2':'https://expe2a.example.com:7443', 
@@ -74,6 +78,7 @@ credentials = {'expe_cluster1':'expe1a.example.com',
                '203.0.113.201':'expe2a.example.com',
                '203.0.113.202':'expe2b.example.com',
                '203.0.113.203':'expe2c.example.com',
+               'dual_interface':True,
 
                'roomID':'abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789abcdefghilmnopqrstuvz0123456789', 
                'bearer':'MNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQMNBVCXZLKJGHGFDSAPOIUYTREWQ-09876-54321-012345678', 
