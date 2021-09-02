@@ -19,6 +19,7 @@ credentials = {#EXPRESSWAY SECTION
                'expe1b.example.com':['admin', 'password1b'],
                '192.0.2.201':'expe1a.example.com', #IP addresses for all peers in all clusters
                '192.0.2.202':'expe1b.example.com',
+               'dual_interface':True,
 
                #Cluster 2 (remove if not present)
                'expe_cluster2':'expe2a.example.com', #FQDN of cluster2 primary peer; add more lines if more clusters are involved 
