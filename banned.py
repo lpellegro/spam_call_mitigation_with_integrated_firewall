@@ -120,6 +120,11 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                          cluster_url = credentials[url_cluster_pointer]
                          if cluster_url != current_cluster_url:
                              print('Adding ', cluster_url, ' to ban_list ')
+                             cluster_fqdn_and_port = cluster_url.split('https://')[1]
+                             cluster_fqdn = cluster_fqdn_and_port.split(':')[0]
+                             username = credentials[cluster_fqdn][0]
+                             secret = credentials[cluster_fqdn][1]
+                             firewall(ip, 'ban', cluster_fqdn_and_port, username, secret)
                              firewall(ip, 'ban', cluster_url.split('https://')[1], username, secret)
                          a += 1
                          url_cluster_pointer = 'url_cluster' + str(a)
