@@ -90,6 +90,7 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
    newitemflag=0   
    check_firewall_flag = 0
    #discover new IPs and append to the list
+   ban_list = []
    for i in range(storindex):
        lenght=len(storage[i]['records'])
        print("Parsing peer", i)
@@ -112,6 +113,16 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                      host_url = urlparse(url).netloc
                      firewall (ip, 'ban', host_url, username, secret)
                      array_items.append(ip)
+                     url_cluster_pointer = 'url_cluster1'
+                     current_cluster_url = url.split('/api/management/status/fail2banbannedaddress')[0]
+                     a = 1
+                     while url_cluster_pointer in credentials:
+                         cluster_url = credentials[url_cluster_pointer]
+                         if cluster_url != current_cluster_url:
+                             print('Adding ', cluster_url, ' to ban_list ')
+                             firewall(ip, 'ban', cluster_url.split('https://')[1], username, secret)
+                         a += 1
+                         url_cluster_pointer = 'url_cluster' + str(a)
 
                   #print('IP automatically removed from the list')
                   new_items.append([ip, calling, called, timestamp_day, timestamp_time, current_peer, disconnect_cause, 0, day, unban_flag, found])
