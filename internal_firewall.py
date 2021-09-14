@@ -95,7 +95,7 @@ def firewall(ip, action, expe, username, secret):
 
     if action == 'unban' and index == '':
        print ('already unbanned')
-       return
+       return error
     if action == 'unban' and index != '':
        print(index)
        data = {"Index": index}
