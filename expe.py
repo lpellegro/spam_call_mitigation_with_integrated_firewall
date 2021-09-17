@@ -57,20 +57,13 @@ def terminal(target, user, password, action, ip, space):
    message='xcommand Fail2banExemption'+suffix+' '+ip+ '/32 Jail: "sip-auth"\n'
    print(message)
    remote_conn.send(message)
-   # Getting output I want.
    time.sleep(2)
-   #if remote_conn.recv_ready():
    output = remote_conn.recv(8000)
-   #print('Output is:', output)
-   #print (type(output))
    result=str(output)
    print('Result of operation is:', result)
    print('Result is of type:',type(result))
-   #result_list=result.split()
-   #print(result_list)
    found=0
 
-   #print(findresult)
    if 'status=OK' in result:
        print('success')
        found=1
@@ -108,7 +101,7 @@ def banunban(target, user, secret, ip, action, space):
     if action=='ban':
        apicommand='banip'
        apiaction='ban'
-       #firewall (ip, action, target, user, secret)
+
 
     data={'command':apicommand, 'jail':'sip-auth', 'argument': ip}
     url='https://'+ target +'/api/management/commands/fail2ban'
@@ -201,11 +194,7 @@ def updatefiles(ip_address, execution, exemption_list, jailed_list):
 def check_unban_all (ip, expe, peer):
       #get the other cluster peers
       unban_list = []
-      #port = ''
-      #expe_ip, peer, peer_with_port = ip_port_info (expe, peer)
-      #expe_list = peer_with_port.split(':')
-      #if len (expe_list) > 1:
-         #port = expe_list[1]
+
       username = credentials[peer][0]
       secret = credentials[peer][1]
       peer_with_port = peer + ':' + credentials[peer][4]
@@ -230,35 +219,15 @@ def check_unban_all (ip, expe, peer):
        current_peer=storage[i]['peer']
        if current_peer =='127.0.0.1':
           current_peer = peer
-       #expe_cluster, peer_normalized, peer_norm = ip_port_info(expe_ip, current_peer) #note: due to the query, peer_norm doesn't include the port
-       #print ('In check_unban_all, these are expe_cluster, peer_normalized, peer_norm ' + expe_cluster + ' ' + peer_normalized + ' ' + peer_norm)
+
        for j in range(lenght):
            if storage[i]['records'][j]['jail'] == 'sip-auth' and ip == storage[i]['records'][j]['banned_address']:
               unban_list.append (current_peer)
 
       return unban_list
 
-def ip_port_info (expe, peer):
-      expe_list = expe.split(':')
- 
-      expe_ip = expe_list[0]
-      if peer == '127.0.0.1':
-         peer = expe_ip
-        
-      if len(expe_list) == 1: #use of standard port for https (443)
-         peer_with_port = peer
- 
-      if len (expe_list) > 1:
-         peer_with_port = peer + ':' + expe_list[1]
-      return expe_ip, peer, peer_with_port
-        
-      
-
 def change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, do_not_set_fail2ban):
 
-        #expe_ip, peer, peer_with_port = ip_port_info(expe, peer)
-        #case of cluster made by 1 peer, with standard or dedicated port
-        #print('function change_status, expe_ip is: ', expe_ip)
         user=credentials[peer][0]
         secret=credentials[peer][1]
         peer_with_port =  peer + ':' + credentials[peer][4]
@@ -427,11 +396,7 @@ class ExpeCommand(Command):
               counter_action = 'unban'
            if action == 'unban':
               counter_action = 'ban'
-           #port = ''
-           #expe_ip, peer, peer_with_port = ip_port_info(expe, peer)
-           #expe_list = expe.split(':')
-           #if len(expe_list) > 1:
-              #port = expe_list[1]
+
            username = credentials[peer][0]
            secret = credentials[peer][1]
            firewall(ip, action, expe, username, secret)
@@ -470,13 +435,7 @@ class ExpeCommand(Command):
                  current_peer = unban_list[i]
                  current_port = credentials[current_peer][4]
                  current_expe = current_peer + ':' + current_port
-                 #print('Current peer to analyze for unban procedures:', current_expe)
-                 #if port != '':
-                    #expe = current_expe + ':' + port
-                    #peer = current_expe
-                 #else:
-                    #expe = current_expe
-                    #peer = current_expe
+
                  change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, current_expe, current_peer, day, False)
            #align state_machine by unbanning the banned items
 
