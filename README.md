@@ -5,6 +5,7 @@ Cisco Expressway release X14 is able to mitigate spam calls and toll fraud attem
 This is a bundle made by 2 independent scripts. The first one - ipjail.py - sends a notification card to a Webex space whenever a new IP is banned on a monitored Expressway. 
 The second script - listening_bot.py - allows the admin to interact with the bot by changing the status of an IP between 4 different statuses (ban/unban/exempt/remove exemption) and to request the call activity list of a banned IP.
 The rest of the scripts need to be in the same folder with the two main ones.
+Ban and unban actions work now in a multi-cluster environment: if an IP is banned on one cluster peer, then the ban is automatically extended to the whole cluster and to all other clusters, and the same for unban.
 
 Dependencies:
 - Python 3.9
