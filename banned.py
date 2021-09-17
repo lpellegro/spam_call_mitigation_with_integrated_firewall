@@ -39,7 +39,7 @@ def local_peer (url, peer):
        peer_with_port = peer + ':' + expe_list[1] #consider peer+port when doing ban/unban actions
     return peer, peer_with_port, parsed_url, expe_ip
     
-def Expressway_cluster(url, username, secret, my_file, space, bearer, action_file,today, new_items):
+def Expressway_cluster(url, expe, admin_port, username, secret, my_file, space, bearer, action_file,today, new_items):
    print ('NEW ITEMS AT THE BEGINNING OF THE SCRIPT:', new_items)
    day = str(today)
    #This functions prints a file with banned IPs from an Expressway cluster
@@ -94,7 +94,9 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
    for i in range(storindex):
        lenght=len(storage[i]['records'])
        print("Parsing peer", i)
-       current_peer=storage[i]['peer']
+       current_peer = storage[i]['peer']
+       if current_peer == '127.0.0.1':
+          current_peer = expe
        if i == 0: #if the peer is inside the same cluster the firewall rule shouldn't be updated. But if it's another cluster the firewall rules should be updated also if the IP is already in the banned list
           newcluster = True
        else:
@@ -113,21 +115,21 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                      host_url = urlparse(url).netloc
                      firewall (ip, 'ban', host_url, username, secret)
                      array_items.append(ip)
-                     url_cluster_pointer = 'url_cluster1'
-                     current_cluster_url = url.split('/api/management/status/fail2banbannedaddress')[0]
+                     print ('Appending to the list ', ip)
+                     expe_cluster_pointer = 'expe_cluster1'
                      a = 1
-                     while url_cluster_pointer in credentials:
-                         cluster_url = credentials[url_cluster_pointer]
-                         if cluster_url != current_cluster_url:
-                             print('Adding ', cluster_url, ' to ban_list ')
-                             cluster_fqdn_and_port = cluster_url.split('https://')[1]
-                             cluster_fqdn = cluster_fqdn_and_port.split(':')[0]
-                             username = credentials[cluster_fqdn][0]
-                             secret = credentials[cluster_fqdn][1]
-                             firewall(ip, 'ban', cluster_fqdn_and_port, username, secret)
-                             firewall(ip, 'ban', cluster_url.split('https://')[1], username, secret)
-                         a += 1
-                         url_cluster_pointer = 'url_cluster' + str(a)
+                     while expe_cluster_pointer in credentials:
+                         current_expe = credentials[expe_cluster_pointer]
+                         if current_expe != expe:
+                             print('Adding ', current_expe, ' to ban_list ')
+                             username = credentials[current_expe][0]
+                             secret = credentials[current_expe][1]
+                             current_cluster_uri = current_expe + ':' + credentials[current_expe][4]
+                             print ('ban the same IP in another cluster: ', current_expe)
+                             firewall(ip, 'ban', current_cluster_uri, username, secret)
+                             new_items.append([ip, calling, called, timestamp_day, timestamp_time, current_expe, disconnect_cause, 0, day, unban_flag, found])
+                         a+=1
+                         expe_cluster_pointer = 'expe_cluster' + str(a)
 
                   #print('IP automatically removed from the list')
                   new_items.append([ip, calling, called, timestamp_day, timestamp_time, current_peer, disconnect_cause, 0, day, unban_flag, found])
@@ -138,8 +140,8 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                      host_url = urlparse(url).netloc
                      firewall(ip, 'ban', host_url, username, secret)
 
-                  peer, peer_with_port, parsed_url, expe_ip = local_peer (url, current_peer)
-                  card_id = ip + ':' + peer
+                  #peer, peer_with_port, parsed_url, expe_ip = local_peer (url, current_peer)
+                  card_id = ip + ':' + current_peer
                   card_identifier_list = column (action_list, 0)
                   #the IP was already in the global list. Now we have to check why it has been received on a peer (i.e. firewall not working)
                   if card_id not in card_identifier_list:
@@ -155,12 +157,12 @@ def Expressway_cluster(url, username, secret, my_file, space, bearer, action_fil
                        #the IP has been received on this peer but has also been received concurrently on another peer. The first peer will have the "fw check" flag, while the other won't as it's a repetition
                        check_firewall_flag = 0
                        print ('IP: ' + ip + ' RECEIVED ON PEER CONCURRENTLY WITH ANOTHER')
-                     new_peer_items.append([ip, calling, called, timestamp_day, timestamp_time, peer, disconnect_cause, check_firewall_flag, day, unban_flag, found])
+                     new_peer_items.append([ip, calling, called, timestamp_day, timestamp_time, current_peer, disconnect_cause, check_firewall_flag, day, unban_flag, found])
                   else:
                      new_ip_items = column (new_items, 0)
                      if ip in new_ip_items:
                        calling, called, timestamp_day, timestamp_time, disconnect_cause, unban_flag, found = cdrcheck(url,username,secret,ip,'/api/management/status/call/call')
-                       new_peer_items.append([ip, calling, called, timestamp_day, timestamp_time, peer, disconnect_cause, 0, '', unban_flag, found])
+                       new_peer_items.append([ip, calling, called, timestamp_day, timestamp_time, current_peer, disconnect_cause, 0, '', unban_flag, found])
                      
    if newitemflag==0:
       print("No new IP found")
@@ -194,7 +196,7 @@ def send_card (any_list, url, action_file, today, space, bearer, new_peer):
         if calling_id == 'Unknown' and called_id == 'Unknown':
            calling_id = 'No call activities'
            called_id = 'No call activities'
-        peer, peer_with_port, parsed_url, expe_ip = local_peer (url, peer)
+        parsed_url = peer + ':' + credentials[peer][4]
         disconnect_cause = any_list[index][6]
         check_firewall_flag = any_list[index][7]
         print ('ANY LIST IS: ', any_list)
@@ -212,7 +214,7 @@ def send_card (any_list, url, action_file, today, space, bearer, new_peer):
            with open(action_file, newline='') as a_f: 
                reader = csv.reader(a_f)
                action_list = list(reader)
-               #rint(action_list)
+               #print(action_list)
                for i, v in enumerate(action_list):
                  if v[0] == card_identifier:
                    post_id = action_list [i][1]
@@ -228,11 +230,12 @@ def send_card (any_list, url, action_file, today, space, bearer, new_peer):
            flag_remove_exemption = True
 
            #case of cluster made by 1 peer, with standard or dedicated port
-  
+           peer_with_port = peer + ':' + credentials['peer'][4]
            print('Peer to connect to with port is: ', peer_with_port)
+           #url = 'https://' + peer_with_port
            
-           user=credentials[expe_ip][0]
-           secret=credentials[expe_ip][1]
+           user=credentials[peer][0]
+           secret=credentials[peer][1]
            print('username: ', user, 'password: ', secret)
            error = banunban(peer_with_port, user, secret, ip, 'unban', space)
            if error == '':

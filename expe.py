@@ -108,7 +108,8 @@ def banunban(target, user, secret, ip, action, space):
     if action=='ban':
        apicommand='banip'
        apiaction='ban'
-       firewall (ip, action, target, user, secret)
+       #firewall (ip, action, target, user, secret)
+
     data={'command':apicommand, 'jail':'sip-auth', 'argument': ip}
     url='https://'+ target +'/api/management/commands/fail2ban'
     print ('sending API request to: ', url)
@@ -200,13 +201,14 @@ def updatefiles(ip_address, execution, exemption_list, jailed_list):
 def check_unban_all (ip, expe, peer):
       #get the other cluster peers
       unban_list = []
-      port = ''
-      expe_ip, peer, peer_with_port = ip_port_info (expe, peer)      
-      expe_list = peer_with_port.split(':')
-      if len (expe_list) > 1:
-         port = expe_list[1]
-      username = credentials[expe_ip][0]
-      secret = credentials[expe_ip][1]
+      #port = ''
+      #expe_ip, peer, peer_with_port = ip_port_info (expe, peer)
+      #expe_list = peer_with_port.split(':')
+      #if len (expe_list) > 1:
+         #port = expe_list[1]
+      username = credentials[peer][0]
+      secret = credentials[peer][1]
+      peer_with_port = peer + ':' + credentials[peer][4]
       ban_url = 'https://' + peer_with_port + '/api/management/status/fail2banbannedaddress' #banned_url_portion
          
       print("Query sent to:", ban_url)
@@ -226,13 +228,13 @@ def check_unban_all (ip, expe, peer):
        lenght=len(storage[i]['records'])
        print("Parsing peer", i)
        current_peer=storage[i]['peer']
-       expe_cluster, peer_normalized, peer_norm = ip_port_info(expe_ip, current_peer) #note: due to the query, peer_norm doesn't include the port
-       print ('In check_unban_all, these are expe_cluster, peer_normalized, peer_norm ' + expe_cluster + ' ' + peer_normalized + ' ' + peer_norm)
+       if current_peer =='127.0.0.1':
+          current_peer = peer
+       #expe_cluster, peer_normalized, peer_norm = ip_port_info(expe_ip, current_peer) #note: due to the query, peer_norm doesn't include the port
+       #print ('In check_unban_all, these are expe_cluster, peer_normalized, peer_norm ' + expe_cluster + ' ' + peer_normalized + ' ' + peer_norm)
        for j in range(lenght):
            if storage[i]['records'][j]['jail'] == 'sip-auth' and ip == storage[i]['records'][j]['banned_address']:
-              if port != '':
-                 current_peer = peer_normalized + ':' + port
-              unban_list.append (peer_normalized)
+              unban_list.append (current_peer)
 
       return unban_list
 
@@ -252,25 +254,26 @@ def ip_port_info (expe, peer):
         
       
 
-def change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, ban_expired):
+def change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, do_not_set_fail2ban):
 
-        expe_ip, peer, peer_with_port = ip_port_info(expe, peer)
+        #expe_ip, peer, peer_with_port = ip_port_info(expe, peer)
         #case of cluster made by 1 peer, with standard or dedicated port
-        print('function change_status, expe_ip is: ', expe_ip)
-        user=credentials[expe_ip][0]
-        secret=credentials[expe_ip][1]
-        
-        print('Peer to connect to with port is: ', peer_with_port)
-        if action == 'unban' and ban_expired == True:
+        #print('function change_status, expe_ip is: ', expe_ip)
+        user=credentials[peer][0]
+        secret=credentials[peer][1]
+        peer_with_port =  peer + ':' + credentials[peer][4]
+
+        #print('Peer to connect to with port is: ', peer_with_port)
+        if action == 'unban' or action == 'ban' and do_not_set_fail2ban == True:
            error = ''
-        if action == 'ban' or action == 'unban' and ban_expired == False:
+        if action == 'ban' or action == 'unban' and do_not_set_fail2ban == False:
            error = banunban(peer_with_port, user, secret, ip, action, room_id)
         if action == 'exempt' or action == 'unexempt':
-           done=terminal(expe_ip, user, secret, action, ip, room_id)
+           done=terminal(peer, user, secret, action, ip, room_id)
            print(done)
            if 'error' in done or done == 'FAILED':
               error = 'error'
-              fqdnexpe = expe.split(":", 1)[0] #split the fqdn in 2 pieces and removes the :port
+              fqdnexpe = peer #expe.split(":", 1)[0] #split the fqdn in 2 pieces and removes the :port
               values={'roomId': room_id, 'markdown':'Generic error or unable to connect to ' + fqdnexpe}
            else:
               error = ''
@@ -419,64 +422,81 @@ class ExpeCommand(Command):
         day = json_actions['_json_data']['inputs']['time']
         print('IP IS: ', ip, ' ACTION IS: ', action, ' EXPE IS: ', expe, 'PEER IS: ', peer) 
         
-        if action == 'unban':
-           port = ''
-           expe_ip, peer, peer_with_port = ip_port_info(expe, peer)
-           expe_list = expe.split(':')
-           if len(expe_list) > 1:
-              port = expe_list[1]
-           username = credentials[expe_ip][0]
-           secret = credentials[expe_ip][1]
+        if action == 'unban' or action == 'ban':
+           if action ==  'ban':
+              counter_action = 'unban'
+           if action == 'unban':
+              counter_action = 'ban'
+           #port = ''
+           #expe_ip, peer, peer_with_port = ip_port_info(expe, peer)
+           #expe_list = expe.split(':')
+           #if len(expe_list) > 1:
+              #port = expe_list[1]
+           username = credentials[peer][0]
+           secret = credentials[peer][1]
            firewall(ip, action, expe, username, secret)
-           unban_list = check_unban_all (ip, expe, peer)
-           print ('unban_list is:', unban_list)
-           # get in unban_list all the clusters and not only the original one
-           url_cluster = 'url_cluster1'
-           i = 1
-           while url_cluster in credentials:
-               current_cluster = credentials[url_cluster]
-               other_expe = current_cluster.split('://')[1]
-               if other_expe != expe:
-                  other_peer = other_expe.split(':')[0]
-                  print ('Adding other_expe to unban_list ', other_expe)
-                  print ('Other peer is ', other_peer)
-                  other_cluster_unban_list = check_unban_all (ip, other_expe, other_peer)
-                  unban_list = unban_list + other_cluster_unban_list
-               i += 1
-               url_cluster = 'url_cluster' + str(i)
-           print ('Full unban list is ', unban_list)
-           # this section unbans from the firewall if the IP ban has expired on Expressway
-           if unban_list == []:
+           if action == 'ban':
               change_status(room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, True)
-           else:
+           if action == 'unban':
+              unban_list = check_unban_all (ip, expe, peer)
+              print ('unban_list is:', unban_list)
+           # apply the same action to all clusters; get into unban_list all the clusters and not only the original one
+           expe_primary = credentials[peer][3]
+           i = 1
+           current_cluster_pointer = 'expe_cluster1'
+           while current_cluster_pointer in credentials:
+              current_cluster = credentials[current_cluster_pointer]
+              #other_expe = current_cluster.split('://')[1]
+              if current_cluster != expe_primary: #other_expe != expe:
+                   current_cluster_port = credentials[current_cluster][4]
+                   current_cluster_with_port = current_cluster + ':' + current_cluster_port
+                   #print ('Adding current_cluster to unban_list ', current_cluster)
+                   firewall(ip, action, current_cluster_with_port, username, secret)
+                   if action == 'ban':
+                      change_status(room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, True)
+                   if action == 'unban':
+                      current_cluster_unban_list = check_unban_all (ip, current_cluster_with_port, current_cluster)
+                      unban_list = unban_list + current_cluster_unban_list
+              i += 1
+              current_cluster_pointer = 'expe_cluster' + str(i)
+
+
+           # this section unbans from the firewall if the IP ban has expired on Expressway
+           if action == 'unban' and unban_list == []:
+              change_status(room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, True)
+           if action == 'unban' and unban_list != []:
               l = len(unban_list)
               for i in range(l):
-                 current_expe = unban_list[i]
-                 print('Current peer to analyze for unban procedures:', current_expe)
-                 if port != '':
-                    expe = current_expe + ':' + port
-                    peer = current_expe
-                 else:
-                    expe = current_expe
-                    peer = current_expe
-                 change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, False)
+                 current_peer = unban_list[i]
+                 current_port = credentials[current_peer][4]
+                 current_expe = current_peer + ':' + current_port
+                 #print('Current peer to analyze for unban procedures:', current_expe)
+                 #if port != '':
+                    #expe = current_expe + ':' + port
+                    #peer = current_expe
+                 #else:
+                    #expe = current_expe
+                    #peer = current_expe
+                 change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, current_expe, current_peer, day, False)
            #align state_machine by unbanning the banned items
+
            with open(state_machine, newline='') as a_f:
                reader = csv.reader(a_f)
                action_list = list(reader)
                print('align function initiated')
                for i, v in enumerate(action_list):
-                   if ip in v[0]:
+                   if ip == v[0].split(':')[0]:
                       print('analyzing state machine ', v[0])
-                      if action_list[i][2] == 'banned':
+                      if action_list[i][2] != action + 'ned': #state is ban-ned or unban-ned
                           print ('align state machine: found ', v[0])
+                          print ('state is: ', action_list[i][2])
                           expe_list = v[0].split(':')
                           expe = expe_list[1]
                           peer = expe
-                          change_status(room_id, jailed_file, exempt_file, state_machine, bearer, ip, 'unban', expe, peer, day, True)
+                          change_status(room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, True)
 
 
-        if action != 'unban':
+        if action != 'unban' and action != 'ban':
            change_status (room_id, jailed_file, exempt_file, state_machine, bearer, ip, action, expe, peer, day, False)
 
        
