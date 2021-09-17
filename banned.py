@@ -12,8 +12,6 @@ import json
 import os
 import csv
 import urllib.parse
-from datetime import datetime
-from datetime import date
 from urllib.parse import urlparse
 from requests.auth import HTTPBasicAuth
 from expe import banunban
@@ -24,21 +22,6 @@ from internal_firewall import firewall
 def column(array, i):
     return [row[i] for row in array]
 
-def local_peer (url, peer):
-    parsed_url = urllib.parse.urlparse(url).netloc #take the LHS of the URL to identify the cluster in the response. returns https://expe1.example.com:7443 (with port)
-    expe_list = parsed_url.split(':') #splits into a list: ['https://expe1.example.com', '7443']
-    expe_ip = expe_list[0] #'https://expe1.example.com' this is the master
-        
-    if peer == '127.0.0.1':
-       peer = expe_ip #equal to master if single peer
-        
-    if len(expe_list) == 1: #means no port needs to be added to the url
-       peer_with_port = peer
- 
-    if len (expe_list) > 1:
-       peer_with_port = peer + ':' + expe_list[1] #consider peer+port when doing ban/unban actions
-    return peer, peer_with_port, parsed_url, expe_ip
-    
 def Expressway_cluster(url, expe, admin_port, username, secret, my_file, space, bearer, action_file,today, new_items):
    print ('NEW ITEMS AT THE BEGINNING OF THE SCRIPT:', new_items)
    day = str(today)
