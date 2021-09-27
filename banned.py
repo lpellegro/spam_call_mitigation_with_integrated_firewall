@@ -213,7 +213,7 @@ def send_card (any_list, url, action_file, today, space, bearer, new_peer):
            flag_remove_exemption = True
 
            #case of cluster made by 1 peer, with standard or dedicated port
-           peer_with_port = peer + ':' + credentials['peer'][4]
+           peer_with_port = peer + ':' + credentials[peer][4]
            print('Peer to connect to with port is: ', peer_with_port)
            #url = 'https://' + peer_with_port
            
